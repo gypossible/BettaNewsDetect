@@ -1,0 +1,172 @@
+<html lang="zh-CN"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微舆分析系统 | BettaFish-Lite</title>
+    <meta name="description" content="多Agent协作的智能舆情分析系统，打破信息茧房，还原舆情原貌">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style id="antigravity-scroll-lock-style">
+  html:root body.antigravity-scroll-lock {
+    overflow: hidden !important;
+  }
+</style><style>
+  body::-webkit-scrollbar {
+    display: none;
+  }
+  html::-webkit-scrollbar {
+    display: none;
+  }
+</style></head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <div class="bg-orb bg-orb-1"></div>
+        <div class="bg-orb bg-orb-2"></div>
+        <div class="bg-orb bg-orb-3"></div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-brand">
+            <span class="brand-icon">🐟</span>
+            <span class="brand-text">微舆</span>
+            <span class="brand-tag">BettaFish-Lite</span>
+        </div>
+        <div class="nav-links">
+            <button class="nav-btn active" data-view="home" id="nav-home">首页</button>
+            <button class="nav-btn" data-view="reports" id="nav-reports">历史报告</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Home View -->
+        <section class="view active" id="view-home">
+            <!-- Hero Section -->
+            <div class="hero" id="hero-section">
+                <h1 class="hero-title">
+                    <span class="gradient-text">智能舆情分析</span>
+                    <span class="hero-subtitle">多Agent协作 · AI驱动 · 全域洞察</span>
+                </h1>
+                <p class="hero-description">
+                    像聊天一样提出分析需求，多个AI智能体将自动协作，搜索全网信息、分析舆论情感、生成专业报告。
+                </p>
+
+                <!-- Input Area -->
+                <div class="input-container" id="input-container">
+                    <div class="input-glow"></div>
+                    <textarea id="query-input" class="query-input" placeholder="请输入您想分析的舆情话题，例如：
+• 近期AI大模型发展趋势分析
+• 某品牌声誉舆情分析
+• 某热点事件社会反应分析" rows="3"></textarea>
+                    <button class="submit-btn" id="submit-btn" onclick="startAnalysis()">
+                        <span class="btn-text">🚀 开始分析</span>
+                        <span class="btn-loading" style="display:none;">
+                            <span class="spinner"></span> 分析中...
+                        </span>
+                    </button>
+                </div>
+
+                <!-- Feature Cards -->
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🔍</div>
+                        <h3>全域搜索</h3>
+                        <p>QueryAgent 自动搜索国内外网页和新闻</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🎭</div>
+                        <h3>情感分析</h3>
+                        <p>SentimentAgent 深度解析舆论情感倾向</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🗣️</div>
+                        <h3>论坛协作</h3>
+                        <p>多Agent通过论坛机制协作碰撞观点</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3>智能报告</h3>
+                        <p>ReportAgent 自动生成交互式分析报告</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analysis Progress Panel (Hidden Initially) -->
+            <div class="analysis-panel" id="analysis-panel" style="display:none;">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <span class="pulse-dot"></span>
+                        分析进行中
+                    </h2>
+                    <span class="panel-query" id="panel-query"></span>
+                </div>
+
+                <!-- Agent Status Cards -->
+                <div class="agent-grid" id="agent-grid">
+                    <div class="agent-card" id="agent-QueryAgent" data-status="waiting">
+                        <div class="agent-avatar">🔍</div>
+                        <div class="agent-info">
+                            <div class="agent-name">QueryAgent</div>
+                            <div class="agent-role">信息搜索专家</div>
+                            <div class="agent-status-text">等待启动...</div>
+                            <div class="agent-progress-bar"><div class="agent-progress-fill"></div></div>
+                        </div>
+                    </div>
+                    <div class="agent-card" id="agent-SentimentAgent" data-status="waiting">
+                        <div class="agent-avatar">🎭</div>
+                        <div class="agent-info">
+                            <div class="agent-name">SentimentAgent</div>
+                            <div class="agent-role">情感分析专家</div>
+                            <div class="agent-status-text">等待启动...</div>
+                            <div class="agent-progress-bar"><div class="agent-progress-fill"></div></div>
+                        </div>
+                    </div>
+                    <div class="agent-card" id="agent-ReportAgent" data-status="waiting">
+                        <div class="agent-avatar">📊</div>
+                        <div class="agent-info">
+                            <div class="agent-name">ReportAgent</div>
+                            <div class="agent-role">报告生成专家</div>
+                            <div class="agent-status-text">等待启动...</div>
+                            <div class="agent-progress-bar"><div class="agent-progress-fill"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Event Log -->
+                <div class="event-log" id="event-log">
+                    <div class="log-header">
+                        <span>📋 实时日志</span>
+                        <span class="log-count" id="log-count">0 条消息</span>
+                    </div>
+                    <div class="log-content" id="log-content"></div>
+                </div>
+
+                <!-- Result Section -->
+                <div class="result-section" id="result-section" style="display:none;">
+                    <div class="result-card success">
+                        <div class="result-icon">🎉</div>
+                        <h3>分析完成！</h3>
+                        <p id="result-summary"></p>
+                        <a id="result-link" href="#" target="_blank" class="result-btn">📄 查看完整报告</a>
+                        <button class="result-btn secondary" onclick="resetAnalysis()">🔄 开始新的分析</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Reports View -->
+        <section class="view" id="view-reports">
+            <div class="reports-container">
+                <h2 class="section-title gradient-text">📚 历史报告</h2>
+                <div class="reports-list" id="reports-list">
+                    <div class="loading-placeholder">加载中...</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="/static/js/app.js"></script>
+
+
+<div id="preact-border-shadow-host" popover="manual" style="border: none; padding: 0px; margin: 0px; inset: 0px; position: fixed; width: 100vw; height: 100vh; background: transparent; pointer-events: none;"></div></body></html>
