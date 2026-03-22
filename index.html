@@ -1,0 +1,431 @@
+<html lang="zh-CN"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>舆情分析报告</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&amp;display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0f0f23;
+            --bg-secondary: #1a1a3e;
+            --bg-card: rgba(255,255,255,0.05);
+            --text-primary: #e8e8ff;
+            --text-secondary: #a0a0cc;
+            --accent-1: #6c63ff;
+            --accent-2: #00d4aa;
+            --accent-3: #ff6b6b;
+            --accent-4: #ffd93d;
+            --border: rgba(255,255,255,0.1);
+            --glow: 0 0 20px rgba(108,99,255,0.3);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.8;
+            min-height: 100vh;
+        }
+        .report-header {
+            background: linear-gradient(135deg, #1a1a3e 0%, #2d1b69 50%, #1a1a3e 100%);
+            padding: 60px 40px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+        .report-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(108,99,255,0.1) 0%, transparent 60%);
+            animation: pulse 8s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        .report-header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6c63ff, #00d4aa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            margin-bottom: 10px;
+        }
+        .report-header .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1em;
+            position: relative;
+        }
+        .report-header .meta {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            margin-top: 15px;
+            position: relative;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        .nav-bar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(15,15,35,0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 0;
+        }
+        .nav-bar .container {
+            padding: 0 20px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .nav-btn {
+            padding: 6px 16px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+        .nav-btn:hover {
+            background: var(--accent-1);
+            color: white;
+            border-color: var(--accent-1);
+            box-shadow: var(--glow);
+        }
+        .executive-summary {
+            background: linear-gradient(135deg, rgba(108,99,255,0.1), rgba(0,212,170,0.1));
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+        .executive-summary h2 {
+            color: var(--accent-2);
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 30px 0;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--glow);
+        }
+        .stat-card .number {
+            font-size: 2em;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stat-card .label {
+            color: var(--text-secondary);
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+        .chapter {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px;
+            margin: 24px 0;
+            transition: box-shadow 0.3s;
+        }
+        .chapter:hover { box-shadow: var(--glow); }
+        .chapter h2 {
+            color: var(--accent-1);
+            font-size: 1.4em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--accent-1);
+            display: inline-block;
+        }
+        .chapter h3 { color: var(--accent-2); margin: 20px 0 10px; }
+        .chapter p { margin: 12px 0; color: var(--text-primary); }
+        .chapter ul, .chapter ol {
+            margin: 12px 0 12px 24px;
+            color: var(--text-secondary);
+        }
+        .chapter li { margin: 6px 0; }
+        .chapter blockquote {
+            border-left: 3px solid var(--accent-1);
+            padding: 10px 20px;
+            margin: 15px 0;
+            background: rgba(108,99,255,0.05);
+            border-radius: 0 8px 8px 0;
+            color: var(--text-secondary);
+        }
+        .chart-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px;
+            margin: 24px 0;
+        }
+        .chart-container h2 {
+            color: var(--accent-1);
+            margin-bottom: 20px;
+        }
+        .chart-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        .chart-box {
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .keywords-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 20px 0;
+        }
+        .keyword-tag {
+            padding: 6px 16px;
+            background: linear-gradient(135deg, rgba(108,99,255,0.2), rgba(0,212,170,0.2));
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            color: var(--text-primary);
+            font-size: 0.85em;
+            transition: all 0.3s;
+        }
+        .keyword-tag:hover {
+            background: var(--accent-1);
+            transform: scale(1.05);
+        }
+        .sources-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px;
+            margin: 24px 0;
+        }
+        .sources-section h2 { color: var(--accent-1); margin-bottom: 20px; }
+        .source-item {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .source-item:last-child { border-bottom: none; }
+        .source-badge {
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-size: 0.75em;
+            font-weight: 500;
+        }
+        .source-badge.web { background: rgba(108,99,255,0.2); color: var(--accent-1); }
+        .source-badge.news { background: rgba(0,212,170,0.2); color: var(--accent-2); }
+        .source-item a {
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .source-item a:hover { color: var(--accent-1); }
+        .footer {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+            font-size: 0.85em;
+            border-top: 1px solid var(--border);
+            margin-top: 40px;
+        }
+        @media (max-width: 768px) {
+            .report-header h1 { font-size: 1.8em; }
+            .chart-row { grid-template-columns: 1fr; }
+            .container { padding: 20px 15px; }
+        }
+    </style>
+<style id="antigravity-scroll-lock-style">
+  html:root body.antigravity-scroll-lock {
+    overflow: hidden !important;
+  }
+</style></head>
+<body class="">
+    <div class="report-header">
+        <h1>舆情分析报告</h1>
+        <div class="subtitle"></div>
+        <div class="meta">生成时间: 2026-03-22 15:48:16 | 多智能体协作分析 | 微舆分析系统</div>
+    </div>
+
+    <div class="nav-bar">
+        <div class="container">
+            <a href="#summary" class="nav-btn">📋 执行摘要</a>
+            
+            <a href="#sentiment-chart" class="nav-btn">📊 情感分析</a>
+            <a href="#sources" class="nav-btn">📚 参考来源</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="number">10</div>
+                <div class="label">信息来源数</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">8</div>
+                <div class="label">分析条目数</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">0</div>
+                <div class="label">报告章节数</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">1</div>
+                <div class="label">关键词数</div>
+            </div>
+        </div>
+
+        <!-- Executive Summary -->
+        <div class="executive-summary" id="summary">
+            <h2>📋 执行摘要</h2>
+            <p>Summary here.</p>
+        </div>
+
+        <!-- Chapters -->
+        
+
+        <!-- Sentiment Chart -->
+        <div class="chart-container" id="sentiment-chart">
+            <h2>📊 情感分析数据</h2>
+            <div class="chart-row">
+                <div class="chart-box">
+                    <canvas id="sentimentPie" width="794" height="794" style="display: block; box-sizing: border-box; height: 397px; width: 397px;"></canvas>
+                </div>
+                <div class="chart-box">
+                    <canvas id="sentimentBar" width="794" height="794" style="display: block; box-sizing: border-box; height: 397px; width: 397px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Keywords -->
+        
+        <div class="chart-container">
+            <h2>🏷️ 热门关键词</h2>
+            <div class="keywords-section">
+                
+                <span class="keyword-tag">AI</span>
+                
+            </div>
+        </div>
+        
+
+        <!-- Sources -->
+        <div class="sources-section" id="sources">
+            <h2>📚 参考来源 (0)</h2>
+            
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>本报告由 <strong>微舆分析系统</strong> (BettaFish-Lite) 自动生成</p>
+        <p>多Agent协作 · AI驱动分析 · 2026-03-22 15:48:16</p>
+    </div>
+
+    <script>
+        // Sentiment Pie Chart
+        const pieCtx = document.getElementById('sentimentPie').getContext('2d');
+        new Chart(pieCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['正面', '负面', '中性'],
+                datasets: [{
+                    data: [33.0, 33.0, 34.0],
+                    backgroundColor: ['#00d4aa', '#ff6b6b', '#6c63ff'],
+                    borderColor: 'rgba(15,15,35,0.8)',
+                    borderWidth: 3,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#a0a0cc', font: { size: 13 } }
+                    }
+                }
+            }
+        });
+
+        // Sentiment Bar Chart
+        const barCtx = document.getElementById('sentimentBar').getContext('2d');
+        new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: ['正面', '负面', '中性'],
+                datasets: [{
+                    label: '情感占比 (%)',
+                    data: [33.0, 33.0, 34.0],
+                    backgroundColor: [
+                        'rgba(0,212,170,0.7)',
+                        'rgba(255,107,107,0.7)',
+                        'rgba(108,99,255,0.7)',
+                    ],
+                    borderColor: ['#00d4aa', '#ff6b6b', '#6c63ff'],
+                    borderWidth: 2,
+                    borderRadius: 8,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: { color: '#a0a0cc' },
+                        grid: { color: 'rgba(255,255,255,0.05)' }
+                    },
+                    x: {
+                        ticks: { color: '#a0a0cc' },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+
+        // Smooth scroll
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.preventDefault();
+                const target = document.querySelector(btn.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+    </script>
+
+<div id="preact-border-shadow-host" popover="manual" style="border: none; padding: 0px; margin: 0px; inset: 0px; position: fixed; width: 100vw; height: 100vh; background: transparent; pointer-events: none;"></div></body></html>
